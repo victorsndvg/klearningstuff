@@ -13,7 +13,7 @@
 
 apt-get install apt-transport-https curl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >> /etc/apt/sources.list.d
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >> /etc/apt/sources.list.d/kubernetes.list
 apt-get update
 
 # Install Kubernetes
@@ -29,13 +29,14 @@ swapoff -a
 
 # Set Hostname
 
-hostnamectl set-hostname k-control-plane
+sed -i '1 i\127.0.0.1 kcontrolplane' /etc/hosts
+hostnamectl set-hostname kcontrolplane
 
 # Configure Iptables to see bridged traffic
 # load br_netfilter module
 # Set net.bridge.bridge-nf-call-iptables 1 
 
-modprove overlay
+modprobe overlay
 modprobe br_netfilter
 
 sysctl net.bridge.bridge-nf-call-iptables=1
@@ -48,7 +49,7 @@ sysctl --system
 apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-update
+apt-get update
 apt install -y containerd.io docker-ce docker-ce-cli
 mkdir -p /etc/systemd/system/docker.service.d
 tee /etc/docker/daemon.json <<EOF
